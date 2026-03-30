@@ -17,7 +17,7 @@ public sealed class LinqExercises
     public IEnumerable<string> Task01_StudentsFromWarsaw()
     {
         return UniversityData.Students
-            .Where(s => s.City == "warszaw")
+            .Where(s => s.City == "Warsaw")
             .Select(s => $"{s.IndexNumber}| {s.FirstName} {s.LastName} |{s.City}");
     }
 
@@ -67,7 +67,7 @@ public sealed class LinqExercises
     public IEnumerable<string> Task04_FirstAnalyticsCourse()
     {
         var course = UniversityData.Courses
-            .FirstOrDefault(c => c.Category == "analytics");
+            .FirstOrDefault(c => c.Category == "Analytics");
 
         if (course == null)
         {
@@ -347,7 +347,17 @@ public sealed class LinqExercises
     /// </summary>
     public IEnumerable<string> Challenge01_StudentsWithMoreThanOneActiveCourse()
     {
-        throw NotImplemented(nameof(Challenge01_StudentsWithMoreThanOneActiveCourse));
+        return UniversityData.Students
+            .Join(
+                UniversityData.Enrollments.Where(e => e.IsActive),
+                s => s.Id,
+                e => e.StudentId,
+                (s, e) => new { FullName = $"{s.FirstName} {s.LastName}" }
+            )
+            .GroupBy(x => x.FullName)
+            .Where(g => g.Count() > 1)
+            .Select(g => $"{g.Key} | Active courses: {g.Count()}")
+            .OrderBy(x => x);
     }
 
     /// <summary>
@@ -364,7 +374,20 @@ public sealed class LinqExercises
     /// </summary>
     public IEnumerable<string> Challenge02_AprilCoursesWithoutFinalGrades()
     {
-        throw NotImplemented(nameof(Challenge02_AprilCoursesWithoutFinalGrades));
+        return UniversityData.Courses
+            .Where(c => c.StartDate.Year == 2026 && c.StartDate.Month == 4)
+            .GroupJoin(
+                UniversityData.Enrollments,
+                c => c.Id,
+                e => e.CourseId,
+                (c, enrollments) => new
+                {
+                    c.Title,
+                    HasAnyGrade = enrollments.Any(e => e.FinalGrade != null)
+                }
+            )
+            .Where(x => !x.HasAnyGrade)
+            .Select(x => x.Title);
     }
 
     /// <summary>
