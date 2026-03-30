@@ -97,7 +97,5 @@ public static class UniversityData
             yield return $"{course.Title} | {course.Category} | start: {course.StartDate:yyyy-MM-dd}";
         }
         
-        Console.Out.WriteLine(Enrollments.Count);
-        Console.Out.WriteLine(Courses.Count);
     }
 }
